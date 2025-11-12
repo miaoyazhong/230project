@@ -6,5 +6,5 @@ __pycache__/
 *.pth
 *.h5
 .vscode/
-bert_click_predictor/
+env/
 test/
