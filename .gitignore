@@ -8,3 +8,4 @@ __pycache__/
 .vscode/
 env/
 test/
+bert_click_predictor/model.safetensors
