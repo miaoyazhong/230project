@@ -1,0 +1,10 @@
+__pycache__/
+.ipynb_checkpoints/
+*.DS_Store
+*.log
+*.ckpt
+*.pth
+*.h5
+.vscode/
+bert_click_predictor/
+test/
