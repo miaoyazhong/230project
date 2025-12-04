@@ -86,21 +86,21 @@ def bili_model(image_shape=IMG_SIZE):
     # set training to False to avoid keeping track of statistics in the batch norm layer
     x = base_model(x, training=False) 
     
-    # add the new Binary classification layers
+    # add the new classification layers
     # use global avg pooling to summarize the info in each channel
     x = tf.keras.layers.GlobalAveragePooling2D()(x)
-    
     # include dropout with probability of 0.2 to avoid overfitting
     x = tf.keras.layers.Dropout(0.2)(x)
-    x = tf.keras.layers.BatchNormalization()(x)
-    x = tf.keras.layers.Dropout(0.4)(x)
-    # # fully connected layer with ReLU activation
     x = tf.keras.layers.Dense(256, activation="relu")(x)
+     # include dropout with probability of 0.4 to avoid overfitting
+    x = tf.keras.layers.Dropout(0.4)(x)
 
-    # use a prediction layer with one neuron (as a binary classifier only needs one)
-    outputs = tf.keras.layers.Dense(1, activation="sigmoid")(x)
- 
-    model = tf.keras.Model(inputs, outputs)
+    x = tf.keras.layers.Dense(128, activation="relu")(x)
+
+    # feature vector output
+    feature_output = tf.keras.layers.Dense(128, activation=None, name="image_embedding")(x)
+
+    model = tf.keras.Model(inputs=base_model.input, outputs=feature_output)
     
     return model
 
@@ -118,6 +118,7 @@ model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=base_learning_rat
 initial_epochs = 20
 
 history = model.fit(train_dataset, validation_data=validation_dataset, epochs=initial_epochs)
+model.save("image_embedding_model.h5")
 
 # # Fine-tune the model
 # base_model = model.get_layer('mobilenetv2_1.00_200')
@@ -139,6 +140,7 @@ history = model.fit(train_dataset, validation_data=validation_dataset, epochs=in
 #                          initial_epoch=history.epoch[-1],
 #                          validation_data=validation_dataset)
 
-plot_metrics(history, None) 
+
+#plot_metrics(history, None) 
 
 

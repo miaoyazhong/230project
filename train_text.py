@@ -2,8 +2,10 @@ import pandas as pd
 from transformers import BertTokenizer, BertForSequenceClassification, Trainer, TrainingArguments
 from datasets import Dataset
 from sklearn.model_selection import train_test_split
+import tensorflow as tf
 import torch
 import os
+import dataload
 
 # # 1. Load and label datasets
 # # Read entire lines (since some titles contain commas)
@@ -31,7 +33,8 @@ import os
 
 
 # 2.Split train/test
-df = pd.read_csv("data/train_title.csv", header=0)
+# df = pd.read_csv("data/train_title.csv", header=0)
+df = dataload.load_dataset("data/train_title.csv")
 train_df, test_df = train_test_split(df, test_size=0.1, random_state=42, stratify=df["label"])
 test_dataset = Dataset.from_pandas(test_df)
 train_dataset = Dataset.from_pandas(train_df)
@@ -60,9 +63,17 @@ test_dataset.set_format("torch", columns=["input_ids", "attention_mask", "labels
 
 
 #4.Load pretrained BERT model
-model = BertForSequenceClassification.from_pretrained("bert-base-chinese", num_labels=2)
+bert = BertForSequenceClassification.from_pretrained("bert-base-chinese", num_labels=2)
 
 #5.Training setup
+input_ids = tf.keras.Input(shape=(64,), dtype=tf.int32, name="input_ids")
+attention_mask = tf.keras.Input(shape=(64,), dtype=tf.int32, name="attention_mask")
+bert_outputs = bert(input_ids, attention_mask=attention_mask)
+pooled = bert_outputs.pooler_output    # shape = (batch, 768)
+
+x = tf.keras.layers.Dense(256, activation="relu")(pooled)
+text_embedding = tf.keras.layers.Dense(128, activation=None, name="text_embedding")(x)
+model = tf.keras.Model(inputs=[input_ids, attention_mask], outputs=text_embedding)
 
 training_args = TrainingArguments(
     output_dir="./results",
@@ -89,7 +100,8 @@ trainer = Trainer(
 # 6. Train and save
 trainer.train()
 
-model.save_pretrained("bert_click_predictor")
-tokenizer.save_pretrained("bert_click_predictor")
+# model.save_pretrained("bert_click_predictor")
+# tokenizer.save_pretrained("bert_click_predictor")
+model.save("text_embedding_model.h5")
 
 print("Training complete. Model saved to 'bert_click_predictor'.")
