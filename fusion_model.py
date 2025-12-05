@@ -15,8 +15,8 @@ text_model.trainable = False
 # ---------------------------------------------------
 # 2. Define Inputs for both models
 # ---------------------------------------------------
-# Image input (224x224x3 typical for MobileNet)
-image_input = Input(shape=(320,200, 3), name="image_input")
+# Image input (200x320x3 typical for MobileNet)
+image_input = Input(shape=(200,320, 3), name="image_input")
 
 # Text input (token ids + mask)
 text_input_ids = Input(shape=(64,), dtype=tf.int32, name="input_ids")
@@ -61,16 +61,16 @@ fuse_model.summary()
 # ---------------------------------------------------
 # 6. Training example
 # ---------------------------------------------------
-# fuse_model.fit(
-#     x = {
-#         "image_input": image_array,
-#         "input_ids": token_ids,
-#         "attention_mask": attention_masks
-#     },
-#     y = labels,
-#     batch_size = 32,
-#     epochs = 10,
-#     validation_split = 0.2
-# )
+fuse_model.fit(
+    x = {
+        "image_input": image_array,
+        "input_ids": token_ids,
+        "attention_mask": attention_masks
+    },
+    y = labels,
+    batch_size = 32,
+    epochs = 10,
+    validation_split = 0.2
+)
 
-fuse_model.save("multimodal_virality_model.h5")
+fuse_model.save("multimodal_virality_model.keras")

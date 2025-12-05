@@ -4,10 +4,10 @@ from collections import Counter
 from tensorflow.keras import layers, Model
 import pandas as pd
 # Import data loader
-from dataload import split_dataset_stratified, IMG_SIZE, AUTOTUNE
+from data_load import split_dataset_stratified, IMG_SIZE, AUTOTUNE
 from plot import plot_metrics
 
-CSV_PATH = "data/clean_dataset.csv"
+CSV_PATH = "data/train_split.csv"
 BATCH_SIZE = 32
 
 def print_element_spec(ds, name="dataset"):
@@ -22,7 +22,7 @@ def count_samples(ds):
 def label_distribution_from_df(csv_path):
     df = pd.read_csv(csv_path,
                      header=0,
-                     names=["views", "image_path", "title"],
+                     names=["views", "image_path", "title","bucket"],
                      quotechar='"',
                      escapechar='\\',
                      engine="python")
@@ -40,8 +40,8 @@ def label_distribution_from_df(csv_path):
             return 3
         else:
             return 4
-    buckets = df["views"].map(bucketize_view_count)
-    return dict(buckets.value_counts().sort_index())
+    #buckets = df["views"].map(bucketize_view_count)
+    return dict(df["bucket"].value_counts().sort_index())
 
 def label_distribution_from_dataset(ds):
     # Unbatch for per-sample iteration and count labels
@@ -72,23 +72,6 @@ def show_one_batch_images(ds, n=9):
         plt.tight_layout()
         plt.show()
         break
-
-def build_simple_cnn(num_classes=5):
-    inputs = tf.keras.Input(shape=IMG_SIZE + (3,), name="image_input")
-    x = tf.keras.layers.Rescaling(1.0)(inputs)  # data already normalized in loader; safe no-op
-    x = tf.keras.layers.Conv2D(32, 3, activation="relu")(x)
-    x = tf.keras.layers.MaxPool2D()(x)
-    x = tf.keras.layers.Conv2D(64, 3, activation="relu")(x)
-    x = tf.keras.layers.MaxPool2D()(x)
-    x = tf.keras.layers.Conv2D(128, 3, activation="relu")(x)
-    x = tf.keras.layers.GlobalAveragePooling2D()(x)
-    x = tf.keras.layers.Dropout(0.3)(x)
-    outputs = tf.keras.layers.Dense(num_classes, activation="softmax")(x)
-    model = tf.keras.Model(inputs, outputs)
-    model.compile(optimizer="adam",
-                  loss="sparse_categorical_crossentropy",  # labels are ints 0..4 -> sparse
-                  metrics=["accuracy"])
-    return model
 
 def bili_model_with_classifier(image_shape=IMG_SIZE, embedding_dim=128, num_classes=5):
     input_shape = image_shape + (3,)
@@ -158,7 +141,7 @@ def main():
     losses = tf.keras.losses.SparseCategoricalCrossentropy()
     metrics=['accuracy']
     # Keras needs a loss for every output; set loss weight 0 for embedding (or omit by naming losses)
-    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=base_learning_rate),
+    model.compile(optimizer=tf.keras.optimizers.legacy.Adam(learning_rate=base_learning_rate),
                 loss=losses,
                 metrics=metrics) 
     
@@ -167,7 +150,7 @@ def main():
     train_for_fit = train_ds.shuffle(1000).prefetch(AUTOTUNE)
     test_for_fit = test_ds.prefetch(AUTOTUNE)
     # run 3 epoch for a quick smoke test
-    initial_epochs = 20
+    initial_epochs = 10
     print("Running training...")
     history = model.fit(train_for_fit, validation_data=test_for_fit, epochs=initial_epochs)
     plot_metrics(history, None) 
