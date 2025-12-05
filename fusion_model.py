@@ -5,8 +5,8 @@ from tensorflow.keras.models import Model, load_model
 # ---------------------------------------------------
 # 1. Load pretrained sub-models (image + text)
 # ---------------------------------------------------
-image_model = load_model("image_embedding_model.h5")
-text_model = load_model("text_embedding_model.h5")
+image_model = load_model("image_embedding_model.keras")
+text_model = load_model("text_embedding_model.keras")
 
 # Freeze both embedding models
 image_model.trainable = False
@@ -16,7 +16,7 @@ text_model.trainable = False
 # 2. Define Inputs for both models
 # ---------------------------------------------------
 # Image input (224x224x3 typical for MobileNet)
-image_input = Input(shape=(224, 224, 3), name="image_input")
+image_input = Input(shape=(320,200, 3), name="image_input")
 
 # Text input (token ids + mask)
 text_input_ids = Input(shape=(64,), dtype=tf.int32, name="input_ids")
@@ -52,8 +52,8 @@ fuse_model = Model(
 
 fuse_model.compile(
     optimizer=tf.keras.optimizers.Adam(1e-4),
-    loss="sparse_categorical_crossentropy"
-    metrics=["accuracy", tf.keras.metrics.TopKCategoricalAccuracy(k=2)]
+    loss="sparse_categorical_crossentropy",
+    metrics=["accuracy"]
 )
 
 fuse_model.summary()

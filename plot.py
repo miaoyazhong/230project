@@ -13,8 +13,8 @@ def plot_metrics(history, history_fine):
     # recall = [0.] + history.history['recall']
     # val_recall = [0.] + history.history['val_recall']
 
-    f1 = [0.0] + history.history.get('f1_score', [])
-    val_f1 = [0.0] + history.history.get('val_f1_score', [])
+    # f1 = [0.0] + history.history.get('f1_score', [])
+    # val_f1 = [0.0] + history.history.get('val_f1_score', [])
 
     if history_fine != None:
         acc = [0.] + history_fine.history['accuracy']+ history.history['accuracy']
@@ -26,13 +26,13 @@ def plot_metrics(history, history_fine):
         # recall = [0.] + history_fine.history['recall'] + history.history['recall']
         # val_recall = [0.] + history_fine.history['val_recall'] + history.history['val_recall']
         
-        f1 = [0.0] + history_fine.history.get('f1_score', []) + history.history.get('f1_score', [])
-        val_f1 = [0.0]+ history_fine.history.get('val_f1_score', []) + history.history.get('val_f1_score', [])
+        # f1 = [0.0] + history_fine.history.get('f1_score', []) + history.history.get('f1_score', [])
+        # val_f1 = [0.0]+ history_fine.history.get('val_f1_score', []) + history.history.get('val_f1_score', [])
 
     plt.figure(figsize=(8, 10)) 
 
     # ---- Row 1: Accuracy ----
-    plt.subplot(3, 1, 1)
+    plt.subplot(2, 1, 1)
     plt.plot(acc, label='Training Accuracy')
     plt.plot(val_acc, label='Validation Accuracy')
     plt.legend(loc='lower right')
@@ -41,23 +41,23 @@ def plot_metrics(history, history_fine):
     plt.title('Training and Validation Accuracy')
 
     # ---- Row 2: Loss ----
-    plt.subplot(3, 1, 2)
+    plt.subplot(2, 1, 2)
     plt.plot(loss, label='Training Loss')
     plt.plot(val_loss, label='Validation Loss')
     plt.legend(loc='upper right')
-    plt.ylabel('Cross Entropy')
-    plt.ylim([0, 1.0])
+    plt.ylabel('Sparse Categorical Cross entropy')
+    plt.ylim([0, 2.0])
     plt.title('Training and Validation Loss')
     plt.xlabel('Epoch')
 
-    # ---- Row 2a: F1 Score ----
-    plt.subplot(3, 1, 3)
-    plt.plot(f1, label='Training F1')
-    plt.plot(val_f1, label='Validation F1')
-    plt.legend(loc='lower right')
-    plt.ylabel('F1 Score')
-    plt.ylim([0, 1.0])
-    plt.title('Training and Validation F1 Score')
+    # # ---- Row 2a: F1 Score ----
+    # plt.subplot(3, 1, 3)
+    # plt.plot(f1, label='Training F1')
+    # plt.plot(val_f1, label='Validation F1')
+    # plt.legend(loc='lower right')
+    # plt.ylabel('F1 Score')
+    # plt.ylim([0, 1.0])
+    # plt.title('Training and Validation F1 Score')
 
     # # ---- Row 2b: recall ----
     # plt.subplot(3, 1, 2)
@@ -68,5 +68,5 @@ def plot_metrics(history, history_fine):
     # plt.ylim([0, 1.0])
     # plt.title('Training and Validation Recall')
 
-    plt.tight_layout()  
+    # plt.tight_layout()  
     plt.show()          

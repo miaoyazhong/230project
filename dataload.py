@@ -10,7 +10,7 @@ import tensorflow as tf
 
 # -------------------------------------------------------
 
-IMG_SIZE = (320, 200)
+IMG_SIZE = (200, 320)
 MAX_LEN = 64
 BATCH_SIZE = 32
 AUTOTUNE = tf.data.experimental.AUTOTUNE
@@ -85,37 +85,6 @@ def preprocess(img_path, title, label):
     }
     return features, label
 
-def load_dataset(csv_path):
-# Load CSV
-    df = pd.read_csv(
-    csv_path,
-    header=0,
-    names=["views", "image_path", "title"],
-    quotechar='"',
-    escapechar='\\',
-    engine="python"
-    )
-
-
-    # Bucketize labels
-    df["bucket"] = df["views"].apply(bucketize_view_count)
-    labels = df["bucket"].astype("int32").tolist()
-    image_paths = df["image_path"].tolist()
-    titles = df["title"].tolist()
-
-    # Create initial TF dataset
-    dataset = tf.data.Dataset.from_tensor_slices((image_paths, titles, labels))
-
-    dataset = dataset.map(preprocess, num_parallel_calls=tf.data.AUTOTUNE)
-
-    # Shuffle, batch, prefetch
-    dataset = dataset.shuffle(buffer_size=len(labels), reshuffle_each_iteration=True)
-    dataset = dataset.batch(BATCH_SIZE, drop_remainder=False)  # keep last smaller batch
-    dataset = dataset.prefetch(tf.data.AUTOTUNE)
-
-    return dataset
-
-
 def split_dataset_stratified(csv_path: str,
                              train_frac: float = 0.8,
                              batch_size: int = 32,
@@ -172,8 +141,4 @@ if __name__ == "__main__":
                             batch_size=32,
                             random_state=42)
     print("Train dataset:", train_ds)
-    # for batch in dataset.take(1):
-    #     print("Image batch:", batch[0]["image_input"].shape)
-    #     print("Input IDs batch:", batch[0]["input_ids"].shape)
-    #     print("Attention mask batch:", batch[0]["attention_mask"].shape)
-    #     print("Labels:", batch[1].shape)
+
